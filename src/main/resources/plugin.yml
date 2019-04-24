@@ -1,0 +1,40 @@
+name: WhosThere
+main: com.sleaker.WhosThere.WhosThere
+author: Sleaker, bmlzootown
+version: 1.5.2
+depend: [LuckPerms]
+api-version: 1.13
+commands:
+    who:
+        aliases: [ list, players, online, playerlist]
+        description: lists online players
+    whois:
+        aliases: [ seen, lastlogin, lastlog ]
+        description: get detailed information about a user.
+    whoall:
+        aliases: [ listall ]
+        description: lists online players by world
+    findwho:
+        aliases: [ find, fwho, find-who ]
+        description: searches all online players for names with the given string
+        usage: /<command> <string>
+    inactive:
+        description: checks for inactive players
+    testing:
+        description: testing
+permissions:
+  whosthere.whois:
+    default: op
+    description: Allows a player to get information on when a player was last online.
+  whosthere.admin:
+    default: op
+    description: Displays IP address and other information about a player when using whois
+  whosthere.who:
+    default: true
+    description: Allows a player to get a list of all online players
+  whosthere.staff:
+    default: op
+    description: Anyone with this permission will show up in the staff list
+  whosthere.inactive:
+    default: op
+    description: Players with this permission can use the inactivity command
