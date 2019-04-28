@@ -184,8 +184,6 @@ public class WhosThere extends JavaPlugin {
     }
 
     private String prefix(Player player) {
-        //PermissionManager pm = PermissionsEx.getPermissionManager();
-        //return pm.getUser(player).getPrefix();
         return LuckPermsManager.getUserPrefix(player);
     }
 
@@ -217,6 +215,7 @@ public class WhosThere extends JavaPlugin {
             if (sender instanceof Player && !this.has((Player)sender, "whosthere.admin")) {
                 return;
             }
+            sender.sendMessage(this.replaceColors("&aUUID: &d" + p.getUniqueId()));
             Location pLoc = p.getLocation();
             sender.sendMessage(this.replaceColors("&aLoc: &d" + pLoc.getBlockX() + "&a, &d" + pLoc.getBlockY() + "&a, &d" + pLoc.getBlockZ() + "&a on: &d" + pLoc.getWorld().getName()));
             long temp = p.getFirstPlayed();
@@ -358,6 +357,7 @@ public class WhosThere extends JavaPlugin {
         Map<World, ArrayList<Player>> players = new HashMap<>();
         sender.sendMessage(ChatColor.WHITE + "--- Players Per World ---");
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (sender instanceof Player && !((Player)sender).canSee(player)) continue;
             World w = player.getWorld();
             players.putIfAbsent(w, new ArrayList<>());
             players.get(w).add(player);
