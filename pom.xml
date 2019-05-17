@@ -6,7 +6,7 @@
 
     <groupId>com.sleakerWhosThere</groupId>
     <artifactId>WhosThere</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.2</version>
     <name>WhosThere</name>
 
     <build>
