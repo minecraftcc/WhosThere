@@ -1,16 +1,21 @@
 package com.sleaker.WhosThere;
 
-import me.lucko.luckperms.api.*;
-import me.lucko.luckperms.api.caching.MetaData;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.NodeType;
+import net.luckperms.api.node.types.InheritanceNode;
+import net.luckperms.api.node.types.PrefixNode;
+import net.luckperms.api.query.QueryOptions;
+
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class LuckPermsManager {
-    private static LuckPermsApi api = WhosThere.luckapi;
+    private static LuckPerms api = WhosThere.luckapi;
 
     public static boolean isPlayerInGroup(Player player, String group) {
         return player.hasPermission("group." + group);
@@ -21,37 +26,38 @@ public class LuckPermsManager {
         return api.getUserManager().getUser(player.getUniqueId());
     }
 
-    private static MetaData getUserMeta(User user, Player player) {
-        Contexts contexts = api.getContextManager().getApplicableContexts(player);
+    private static CachedMetaData getUserMeta(User user, Player player) {
+        QueryOptions contexts = api.getContextManager().getQueryOptions(player);
         return user.getCachedData().getMetaData(contexts);
     }
 
-    private static MetaData getGroupMeta(Group group) {
-        return group.getCachedData().getMetaData(Contexts.global());
+    private static CachedMetaData getGroupMeta(Group group) {
+        QueryOptions contexts = api.getContextManager().getStaticQueryOptions();
+        return group.getCachedData().getMetaData(contexts);
     }
 
     public static String getUserPrefix(Player player) {
         User user = loadUser(player);
-        MetaData metaData = getUserMeta(user, player);
+        CachedMetaData metaData = getUserMeta(user, player);
         return metaData.getPrefix();
     }
 
     public static String getUserSuffix(Player player) {
         User user = loadUser(player);
-        MetaData metaData = getUserMeta(user, player);
+        CachedMetaData metaData = getUserMeta(user, player);
         return metaData.getSuffix();
     }
 
     public static void setUserPrefix(Player player, String prefix) {
         User user = loadUser(player);
-        Node node;
+        PrefixNode node;
         if (prefix == null) {
             String pre = getUserPrefix(player);
-            node = api.getNodeFactory().makePrefixNode(99, pre).build();
-            user.unsetPermission(node);
+            node = PrefixNode.builder(pre, 99).build();
+            user.data().remove(node);
         } else {
-            node = api.getNodeFactory().makePrefixNode(99, prefix).build();
-            user.setPermission(node);
+            node = PrefixNode.builder(prefix, 99).build();
+            user.data().add(node);
         }
         api.getUserManager().saveUser(user);
     }
@@ -59,24 +65,28 @@ public class LuckPermsManager {
     public static String getGroupPrefix(String grp) {
         Group group = api.getGroupManager().getGroup(grp);
         if (group == null) return "";
-        MetaData metaData = getGroupMeta(group);
+        CachedMetaData metaData = getGroupMeta(group);
         return metaData.getPrefix();
     }
 
     public static String getGroupSuffix(String grp) {
         Group group = api.getGroupManager().getGroup(grp);
         if (group == null) return "";
-        MetaData metaData = getGroupMeta(group);
+        CachedMetaData metaData = getGroupMeta(group);
         return metaData.getSuffix();
     }
 
     public static List<String> getPlayerGroups(Player player) {
         User user = loadUser(player);
-        List<String> groups = new ArrayList<>(user.getAllNodes().stream()
-                .filter(Node::isGroupNode)
-                .map(Node::getGroupName)
-                .collect(Collectors.toSet()));
-        Collections.sort(groups, Collections.reverseOrder());
-        return groups;
+        List<String> list = user.resolveInheritedNodes(QueryOptions.nonContextual()).stream()
+                .filter(NodeType.INHERITANCE::matches)
+                .map(NodeType.INHERITANCE::cast)
+                .map(InheritanceNode::getGroupName).collect(Collectors.toList());
+        return list;
+    }
+
+    public static String getPlayerMainGroup(Player player) {
+        User user = loadUser(player);
+        return user.getPrimaryGroup();
     }
 }

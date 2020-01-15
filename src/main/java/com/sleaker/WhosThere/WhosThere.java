@@ -4,12 +4,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-import me.lucko.luckperms.LuckPerms;
-import me.lucko.luckperms.api.Group;
-import me.lucko.luckperms.api.HeldPermission;
-import me.lucko.luckperms.api.LuckPermsApi;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.group.Group;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.HeldNode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -30,7 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class WhosThere extends JavaPlugin {
     public static Plugin plugin;
-    public static LuckPermsApi luckapi;
+    public static LuckPerms luckapi;
     public static List<String> players = new ArrayList<>();
     private Logger log = Logger.getLogger("Minecraft");
     private String plugName;
@@ -60,7 +60,7 @@ public class WhosThere extends JavaPlugin {
         if (!pm.getPlugin("LuckPerms").isEnabled()) {
             pm.disablePlugin(this);
         } else {
-            luckapi = LuckPerms.getApi();
+            luckapi = LuckPermsProvider.get();
         }
 
         ConfigManager.configExistence();
@@ -151,15 +151,15 @@ public class WhosThere extends JavaPlugin {
                     log.info("[WhosThere] Group " + rank + " not found!");
                     return;
                 }
-                CompletableFuture<List<HeldPermission<UUID>>> cf = luckapi.getUserManager().getWithPermission("group." + group.getName());
-                List<HeldPermission<UUID>> users = cf.join().stream()
-                        .filter(HeldPermission::getValue)
-                        .collect(Collectors.toList());
+                CompletableFuture<List<HeldNode<UUID>>> cf = luckapi.getUserManager().getWithPermission("group." + group.getName());
+                List<HeldNode<UUID>> users = new ArrayList<>(cf.join());
                 if (!users.isEmpty()) {
-                    for (HeldPermission<UUID> user : users) {
-                        String username = luckapi.getUserManager().getUser(user.getHolder()).getName();
-                        if (!players.contains(username)) {
-                            players.add(username);
+                    for (HeldNode<UUID> user : users) {
+                        User u = luckapi.getUserManager().getUser(user.getHolder());
+                        if (u != null) {
+                            if (!players.contains(u.getUsername())) {
+                                players.add(u.getUsername());
+                            }
                         }
                     }
                 }
