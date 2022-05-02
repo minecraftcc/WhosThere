@@ -6,7 +6,7 @@
 
     <groupId>com.sleakerWhosThere</groupId>
     <artifactId>WhosThere</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <name>WhosThere</name>
 
     <build>
@@ -50,20 +50,13 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.15.1-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--Bukkit API-->
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.15.1-R0.1-SNAPSHOT</version>
+            <version>1.18.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
-            <version>5.0</version>
+            <version>5.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

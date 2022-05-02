@@ -3,7 +3,7 @@ main: com.sleaker.WhosThere.WhosThere
 author: Sleaker, bmlzootown
 version: ${project.version}
 depend: [LuckPerms]
-api-version: 1.15
+api-version: 1.18
 commands:
     who:
         aliases: [ list, players, online, playerlist]
